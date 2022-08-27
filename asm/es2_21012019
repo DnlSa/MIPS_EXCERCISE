@@ -1,0 +1,76 @@
+.data
+A: .word 1 2 3 4 5 6 7 8 9
+B: .word 8 4 7 5 6 7 8 8 9
+n: .word 9
+k: .word 3
+.text
+.globl main
+main:	la $a0 , A
+	la $a1 , B
+	la $a2 , n
+	lw $a2 , 0($a2)
+	la $a3 , k
+	lw $a3 , 0($a3)
+	jal procedura 
+	add $a0  , $0 , $v0
+	li $v0 , 1
+	syscall
+	li $v0 , 10 
+	syscall
+# la prima cosa da fare e salvare i registri argomento in quanto essendo passati 
+procedura: addi $sp , $sp , -28
+	   sw $ra , 0($sp)  # importante se no non torno 
+	   sw $s0 , 4($sp)  
+	   sw $s1 , 8($sp)
+	   sw $s2 , 12($sp)
+	   sw $s3 , 16($sp)
+	   sw $s4 , 20($sp)
+	   sw $s5 , 24($sp)
+	   #corpo della funzione 
+	   add $s0 , $a0 , $0 # s0 = &A
+	   add $s1 , $a1 , $0 # s1 = &B
+	   add $s2 , $a2 , $0 # s2 = n
+	   add $s3 , $a3 , $0 # s3 = k
+	   add $s4 , $0 ,$0 # inizializzo s4 = 0 <- i= 0 
+	   add $s5 , $0 , $0 # s5 = condizione = 0    
+while: slt $t0 , $s4 , $s2 # while(i<n)
+       beq $t0 , $0 , exit_while
+       bne $s5 , $0 , exit_while # while(!condizione )
+       lw $a0 , 0($s0) # A[i]
+       add $a1, $s1 , $0 # B importante in quanto al ritorno di conta occorrenze il registro argoemmnto non e piu valido 
+       add $a2 , $s2 , $0 # n
+       jal contaOccorrenze    
+       beq $v0 , $s3 , cond # else <- continue
+       add $v0 , $0 , $0
+       add $s4 ,$s4 ,1 # i++
+       add $s0 , $s0 , 4 # A[i++] # altro modo e moltiplicare i *4 e sommarlo ma aumento di 2 istruzioni 
+       j while 
+cond:  add $v0 , $0 , 1
+	add $s5 , $0 ,1
+       j while   
+exit_while: 
+           lw $ra , 0($sp)  # importante se no non torno 
+	   lw $s0 , 4($sp)  
+	   lw $s1 , 8($sp)
+	   lw $s2 , 12($sp)
+	   lw $s3 , 16($sp)
+	   lw $s4 , 20($sp)
+	   lw $s5 , 24($sp)
+           addi $sp , $sp , 28
+           jr $ra 
+contaOccorrenze: 
+	 add $t0 , $0 , $0 # t0 = j= 0
+	 add $v0 , $0 , $0 # t1 = contatore = 0 	 
+for: 	slt $t2 , $t0 , $a2 # for (i= 0  ; i<n ; i++)
+	beq $t2 , $0 , exit_for
+	lw $t4 , 0($a1) # B[i]
+	bne $a0 , $t4 , continue
+	addi $v0 , $v0 , 1 # contatore++
+	addi $t0,  $t0 , 1 # j++
+	add $a1 , $a1 , 4 # B[j++]
+	j for
+continue: addi $t0,  $t0 , 1 # j++
+	add $a1 , $a1 , 4 # B[j++]
+	j for
+exit_for: jr $ra
+	   

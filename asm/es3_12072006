@@ -1,0 +1,49 @@
+.data 
+n: .word 4
+
+.text
+.globl main
+
+main:   la $a0 , n
+	lw  $a0 , 0($a0)
+	jal Proc_Tn
+	add $a0 , $0 , $v0
+	li $v0 , 1 
+	syscall
+	
+	li $v0 ,10
+	syscall
+	
+Proc_Tn: bne $a0 , $0 , T_n
+	 add $v0 , $0 , $0 
+	 jr $ra
+	
+T_n: addi $sp , $sp , -16
+     sw $ra , 0($sp)
+     sw $s0 , 4($sp)
+     sw $s1 , 8($sp)
+     sw $s2 , 12($sp)
+     add $s0 , $a0 , $0  # argomento salvato in s0 
+     
+     add $a0 , $a0 , -1  # n-1
+     jal Proc_Tn # T(n-1)
+     add $s1 ,$0 , $v0
+     add $s2 , $s1 , 1 # T(n-1) + 1 
+     add $a0 , $0 , $s1 # a0= T(n-1)
+     add $a1 , $0 , 10 # a1 = 10
+     jal min # deve essere rilcatal linker 
+     add $v0 , $s2 , $v0  # min(T(n-1), 10)+T(n-1) + 1 
+     lw $ra , 0($sp)
+     lw $s0 , 4($sp)
+     lw $s1 , 8($sp)
+     lw $s2 , 12($sp)
+     addi $sp , $sp , 16      
+     jr $ra              
+           
+min: slt $t0  , $a0 , $a1 # if(T(n-1)<10)-> goto return      
+      bne $t0 , $0 , return_a
+      add $v0 , $0 , $a1 # return_b = 10 
+      jr $ra
+      
+return_a: add $v0 , $0 , $a0 # return_a = T(n-1)
+	jr $ra

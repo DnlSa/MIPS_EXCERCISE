@@ -1,0 +1,93 @@
+.data 
+
+matrix: .word  1 2 3 4  5 6 7 8  9 10 11 12  13 14 15 16   17 18 19 20
+dim : .word 4 5 
+
+
+
+.text
+.globl main 
+
+main: 	
+	addi $sp , $sp , -12
+	sw $ra , 0($sp)
+	
+	la $a0 , matrix # a0 <- &matrix
+	la $t0 , dim # t0 <- &dim
+	lw $a1 , 0($t0) # a0 <- cols <- 4
+	lw $a2 , 4($t0) # a1 <- row <- 5
+	sw $a0 , 4($sp)  # pop dei valori nello stack (mi serviranno per le stampe dei valri)
+	sw $a1 , 8($sp)
+	sll $a3 , $a1 , 2 # a3 = 4*4 valore di spiuazzamento lo passo in input per risparmiare 2 istruzioni nella mirror
+	jal mirror # mirror(£matrix , 4 , 5);
+	lw $a0  , 4($sp)
+	lw $a1  , 8($sp)
+	# funzione di stampa valori # inutile  in quanto  
+	lw $ra , 0($sp)
+	addi $sp , $sp , 8
+	jr $ra
+
+mirror: # void mirror()
+	addi $sp , $sp , -20 # push valori nello stack
+	sw $ra , 0($sp)
+	sw $a0 , 4($sp) # salvo questi registri perche cbhiamewro un altra procedura ricorsiva e quindi non avro piu ul controllo di questi registri 
+	sw $a1 , 8($sp) # i registri $a0 solo CALLER SAVE -> devono essere salvati da colui che chiama un altra funzione 
+	sw $a2 , 12($sp)
+	sw $a3 , 16($sp) # non varia ma non ho certezza che non vari  
+	#a differenza dei registri $s che solo colee save che devono essere salvati dal chhiamato e ripristinati in uscita 
+	#tale logica si traduce un un salvataggio dei registri $s quando li uso nella mia funzione 
+
+#condizione di uscita 
+	beq $a2 , $0 , end2
+	add $a3 ,$a3 , -4
+	add $a2 , $a3 , $a0 # a2 = matrix [i][cols]
+	jal swap # void swap (&matrix[i][0] , matrix[i][cols] , cols ) -> ( a0 , a2 , $a1)
+	
+	lw $a0 , 4($sp) # pop dei valori 
+	lw $a1 , 8($sp)
+	lw $a2 , 12($sp)
+	lw $a3 , 16($sp)
+	
+	add $a0 , $a0 , $a3 # $a0 <- matrix[i++][0]
+	add $a2 , $a2 , -1 #   $a2 <- row--
+ 	jal mirror
+ 	lw $ra , 0($sp)
+	lw $a0 , 4($sp) 
+	lw $a1 , 8($sp)
+	lw $a2 , 12($sp)
+	lw $a3 , 16($sp) 
+ 	addi $sp , $sp , 20
+ 	jr $ra
+
+		
+	
+end2: jr $ra
+	
+	
+	#procedura swap ho il pieno controllo di questa quind i salvo solo cio che mi serve 
+swap : 
+	add $sp , $sp , -4
+	sw $ra , 0($sp)
+	
+	add $a1 , $a1 , -1 # dim--
+	add $t2 , $0 , 1
+	beq $a1 , $t2 , end1
+	
+	lw $t0 , 0($a0) # swap dei valori 
+	lw $t1 , 0($a2)
+	sw $t0 , 0($a2)
+	sw $t1 , 0($a0)
+	
+	add $a0 , $a0 , 4 # matrix [i][j++]
+	add $a2 , $a2 , -4 # matrix[i] [cols--]
+	jal swap
+	
+	lw $ra , 0($sp)
+	add $sp , $sp , 4
+	jr $ra
+	
+	
+	
+	
+end1: jr $ra
+	

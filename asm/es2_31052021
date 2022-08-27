@@ -1,0 +1,37 @@
+# deve modificare la matrice in modo che alla colonna j-esima siano di valori k 
+.data
+A: .word 1 2 3 5  3 4 5 6  6 7 8 9  4 5 6 7
+ji: .word 3
+k: .word 12
+N: .word 4
+
+.text
+.globl main
+main:
+	la $a0 , A
+	la $a1 , N
+	lw $a1 , 0($a1)
+	la $a2 , ji
+	lw $a2 , 0($a2)
+	la $a3 , k
+	lw $a3 , 0($a3)
+	jal procedura
+	li $v0 , 10
+	syscall
+# a0  = &A , a1 = N , a2 = j  , a3 = k 
+# devo trovare il modo di concludere alla 3 riga 
+procedura: add $t5 , $a1 , $0 # s0 = N
+	   
+for : 	   beq $t5 , $0 , exit_for
+           sll $t0 , $a2 , 2 # t0 = 4*j
+           add $t1 , $a0 , $t0 # t1 = A[0][1]
+           sw $a3 , 0($t1) # salvo valore in A
+            # spiazzo alla riga successiva 
+           sll $t2  , $a1 , 2 # 4*3 = 12
+           add $a0 , $a0 , $t2 # spiazzo di 12 byte per puntare alla riga nuova 
+           addi $t5 , $t5 , -1 # s0 
+           j for 
+           
+exit_for: jr $ra           
+            
+ 

@@ -1,0 +1,44 @@
+.data 
+n: .word 7
+.text
+.globl main
+
+main:  la $a0 , n 
+       lw $a0 ,0($a0)
+       jal Proc_Tn
+       add $a0 , $v0 , $0 
+       li $v0 ,1
+       syscall
+       li $v0 ,10 
+       syscall
+        
+Proc_Tn: slti $t0 , $a0 , 3 # if(n<3)-> return 1
+	beq $t0 , $0 , T_n # else ->goto T_n
+	addi $v0 , $0 , 1 
+	jr $ra
+
+T_n:	addi $sp , $sp , -16 # push valori nello stack
+	sw $ra , 0($sp)
+	sw $s0 , 4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12($sp)
+	add $s0 , $a0 , $0  # s0 = n 
+	add $s1 , $0 , $0  # i = 0 
+
+for:    beq $s1 , $s0 , exit_for 
+	add $a0 , $s1 , $0 # a0 = i 
+	jal Proc_Tn # T(i)
+	mult $s1 , $v0 # i*T(i)
+	mflo $s2
+	add $s1 , $s1 , 1 # i++
+	j for
+	
+exit_for: 
+	add $v0 , $s2 , $0
+	lw $ra , 0($sp)
+	lw $s0 , 4($sp)
+	lw $s1 , 8($sp)
+	lw $s2 , 12($sp)
+	addi $sp , $sp , 16 # pop dei valori dalo stack 
+	jr $ra
+	

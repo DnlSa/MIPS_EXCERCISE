@@ -1,0 +1,70 @@
+.data 
+m : .word 2 
+n:  .word 2
+.text
+.globl main
+main:
+	la $a0 , m
+	lw $a0 , 0($a0)
+	la $a1 , n
+	lw $a1 , 0($a1)
+	jal Proc_T
+	add $a0 , $v0 , $0
+	li $v0 , 1
+	syscall
+	li $v0 , 10
+	syscall
+# 2 condizioni messe in or 
+Proc_T:   slti $t0 , $a0 , 3 # if(m<3) <- goto else
+	 beq $t0 , $0 , T_m_n 
+	 slti $t0 , $a1 , 3  # if(n<3) <- go to else 
+	 beq $t0, $0, T_m_n
+	 addi $v0 , $0 , 1
+         jr $ra
+	 	 
+T_m_n:  addi $sp , $sp , -20 #push valori in stack
+ 	sw $ra , 0($sp)
+ 	sw $s0 , 4($sp)
+ 	sw $s1 , 8($sp)
+ 	sw $s2 , 12($sp)
+	sw $s3 , 16($sp)
+	add $s0 , $a0 , $0 # s0 = a0 = m
+	add $s1 , $a1 , $0 # s0= a1 = n 
+ 	addi $a0 , $s0 , -1 # a0 = m-1
+ 	addi $a1 , $s1 , -2 # a1 = n-2
+ 	jal Proc_T # T(m-1 , n-2)
+ 	add $s2 , $0 , $v0 # s2 = v0 -> salvato in stack
+ 	add $a0 , $s0 , $0 # a0 = m
+ 	srl $a0 , $a0 , 1 # a0 = m/2
+ 	add $a1 , $s1 , -2 # n-2
+ 	jal Proc_T # T(m/2 , n-2)
+ 	add $s3 , $0 , $v0 # s3 = v0 -> salvato in stack
+ 	sll $s0 , $s0 , 1 # 2*m
+ 	add $v0, $s0 , $s1 # v0  = (2m  + n ) 
+ 	add $v0 , $v0 , $s2 # v0 = 2m +n + T(m-1 , n-2)
+ 	add $v0 , $v0 , $s3 #v0 = 2m +n + T(m-1 , n-2) + T(m/2 , n-2)
+ 	lw $ra , 0($sp)
+ 	lw $s0 , 4($sp)
+ 	lw $s1 , 8($sp)
+ 	lw $s2 , 12($sp)
+	lw $s3 , 16($sp)
+ 	addi $sp , $sp , 20 # pop valori in stack
+	jr $ra 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	
+ 	 
+ 	 
+ 	  
+ 	   
+ 	    
+ 	      
+
+	
+	 

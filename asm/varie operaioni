@@ -1,0 +1,49 @@
+.globl main
+
+.data
+  prompt1: .asciiz "Intero 1: "
+  prompt2: .asciiz "Intero 2: "
+  resultDescr: .asciiz "Il risultato è "
+
+.text
+
+main:
+  # chiedi numero 1
+  la $a0, prompt1
+  li $v0, 4
+  syscall
+
+  # leggi numero 1
+  li $v0, 5
+  syscall
+	
+  # spostalo in $t0
+  move $t0, $v0
+	
+  # chiedi numero 2
+  la $a0, prompt2
+  li $v0, 4
+  syscall
+	
+  # leggi numero 2
+  li $v0, 5
+  syscall
+
+  # somma i due numeri
+  addu $a1, $v0, $t0
+	
+  # salva testo del risultato
+  la $a0, resultDescr
+  li $v0, 4
+  syscall
+	
+  # carica il risultato dove serve
+  move $a0, $a1
+	
+  # stampa intero
+  li $v0, 1
+  syscall
+	
+  # termina il programma
+  li $v0, 10
+  syscall

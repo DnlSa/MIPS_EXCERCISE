@@ -1,0 +1,75 @@
+.data
+n: .word 6
+A: .word 1 2 3  5 6 7 8 9 
+m: .word 8
+.text 
+.globl main
+main: 
+	la $a0 , A      # a0 = &A
+	la $a1 , n
+	lw $a1 , 0($a1) # a1 = n
+	la $a2 , m
+	lw $a2 , 0($a2) # a2 = m
+	jal Procedura
+	add $a0 , $0 ,$v0 
+	li $v0 , 1
+	syscall
+	li $v0 , 10
+	syscall
+
+Procedura: bne $a1 , $0 , T_n # if(n==0) -> coninue
+	   add $v0 , $0 , $0 # else -> goto appartenenza
+    	   jr $ra
+ # mi calcola T(n-1 ,A) comune ad entrambi i casi s 
+T_n: addi $sp , $sp , -20
+       sw $ra , 0($sp)
+       sw $s0 , 4($sp)
+       sw $s1 , 8($sp)
+       sw $s2 , 12($sp)
+       sw $s3 , 16($sp)
+       add $s0 , $0 , $a0 # s0 = &A
+       add $s1 , $0 , $a1 # s1= n
+       add $s2 , $0 , $a2 # s2 = m
+       addi $a1 , $s1 , -1 # a1 = n-1
+       add $a0 , $s0 , $0 # a2 = &A
+      jal Procedura  # T(n-1 , A)
+      add $s3 , $v0 , $0   # return T(n-1)
+      add $a0 , $s0 , $0 # ripristino registro argomento in quanto non so se sono modificati   
+      add $a1 , $s1 , $0 
+      add $a2 , $s2 , $0
+      jal appartenenza # chiama  appartenenza 
+      beq $v0 , $0 , T_n_2   
+      sll $s3 , $s3 , 1 # s3 = 2*T(n-1 , A) 
+       addi $v0 , $s3 , 1 #  vo  = 2*T(n-1 , A) +1     
+       lw $ra , 0($sp)
+       lw $s0 , 4($sp)
+       lw $s1 , 8($sp)
+       lw $s2 , 12($sp)
+       lw $s3 , 16($sp)
+       addi $sp , $sp , 20
+       jr $ra   
+     
+ T_n_2: addi $v0 , $s3 , 2 # v0 = T(n-1 , A) +2
+        lw $ra , 0($sp)
+        lw $s0 , 4($sp)
+        lw $s1 , 8($sp)
+        lw $s2 , 12($sp)
+        lw $s3 , 16($sp)
+        addi $sp , $sp , 20
+        jr $ra
+#apaprtenenza e un aprocedura folgia iterata quindi non mi serve adottare le convenzioni di chiamata
+appartenenza:  add $t0 , $0 , $0 # inizializzo indice i= 0
+	      add $t3 , $a0 , $0
+for: 	slt $t1 , $t0 , $a2 # for(i=0 ; i<m ; i++) 
+	beq $t1 , $0 , exit_for_2 # condizione di uscita del for non appena i = m su vale 0 
+	lw $t2 , 0($t3)      # carico valpre in t2
+	beq $a1 , $t2 , exit_for_1 # if(n == A[i]) -> goto T_N_1 , else <- continue 
+	add $t3 , $t3 , 4 # t3= A[i+1]
+	add $t0 , $t0 , 1 # i++
+        j for   
+ exit_for_1: add $v0 , $0 , 1 # valore trovato nell array 
+	     jr $ra
+ exit_for_2: add $v0 , $0 , $0 # valore NON trovato nell array 
+		jr $ra		    
+    
+ 

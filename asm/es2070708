@@ -1,0 +1,64 @@
+.data 
+n: .word 4
+.text
+.globl main
+main:
+	la $a0 , n
+	lw $a0 , 0($a0)
+	jal Tn
+	add $a0 , $v0 , $0
+	li $v0 , 10
+	syscall
+
+
+Tn: add $sp , $sp , -16
+    sw $ra , 0($sp)
+    sw $s0 , 4($sp)
+    sw $s1 , 8($sp)
+    sw $s2 , 12($sp)    
+    add $s0 , $a0 , $0 # $a0 = n
+    add $s1 , $0 , $0 # s1 = i = 0
+    addi $s2 , $0 , 0 # inizializzo a 0 in quanto non so cosa ci puo essere dentro 
+ 
+for : beq $s1 , $s0 , exit_for # for(i=0 ;i<n ; i++)
+      add $a0 , $0 , $s1 # 
+      jal Proc_Fn # salto ad fn -> f[i] che diventera f(n) 
+      add $s2 , $s2 , $v0 # somma valori di ritorno di fn 
+      add $s1 , $s1 , 1 # i++
+      j for 
+
+exit_for :  add $v0 , $0 , $s2 # risutlato sommatoria t(n)
+	    lw $ra , 0($sp)
+   	    lw $s0 , 4($sp)
+            lw $s1 , 8($sp)
+            lw $s2 , 12($sp)
+	    addi $sp , $sp , 16 # pop dei valori 
+	    jr $ra # return 
+
+Proc_Fn:slti $t0 , $a0 , 1  # if(a0 <= 1) continue
+	beq $t0 , $0 , FnRic # else -> go to FnRic
+	addi $v0 , $0 , 1  # v0 = 1
+	jr $ra			# return
+						
+FnRic:  addi $sp , $sp , -16
+	sw $ra, 0($sp)
+	sw $s0 ,4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12($sp)
+	addi $s0 , $a0 , 0 # s0 = a0 = n
+	addi $a0 , $a0 , -1 # n-1
+	jal Proc_Fn # f(n-1)
+	add $s1 , $0 , $v0 # s1 = f(n-1)
+	add $a0 , $s0 , $0  # a0 = n # ripristino argomento 
+	addi $a0 , $a0 , -2  # a0 = n-2
+	jal Proc_Fn  # f(n-2)
+	add $s2 , $0 , $v0  # salvo valore s2 = f(n-2) 
+	add $v0 , $s1 , $s2 # v0 = f(n-1)*f(n-2)
+	add $v0 , $v0 , 1 # v0 + 1;
+	lw $ra, 0($sp)
+	lw $s0 ,4($sp)
+	lw $s1 , 8($sp)
+	lw $s2 , 12($sp)
+	addi $sp , $sp , 16 # pop dei valori dallo stack 
+	jr $ra # ritorno 
+	   

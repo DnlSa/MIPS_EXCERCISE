@@ -1,0 +1,81 @@
+.data
+A: .word 1 2 3 4 5 6  
+B: .word 1 2 3 4 5 6 
+n: .word 6
+.text
+.globl main
+ 
+ main:  la $a0 , A
+ 	la $a1 , B
+	la $a2 , n 
+ 	lw $a2 , 0($a2)
+ 	
+ 	jal procedura
+ 	add $a0 , $0 ,$v0 
+ 	li $v0 , 4
+ 	syscall
+ 
+ 	li $v0 ,10
+ 	syscall
+ 	
+procedura: 
+	addi $sp , $s0 , -24
+	sw $ra , 0($sp)
+	sw $s0 , 4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12($sp)
+	sw $s3 , 16($sp)
+	sw $s4 , 20($sp)
+	add $s0 , $a0 , $0 # s0 = &A
+	add $s1 , $a1 , $0 # S1 = &B
+	add $s2 , $a2 , $0 #s2 = n
+	add $s3 , $0 , $0  # contatore = 0 
+	add $s4 , $0 , $0   # indice i= 0  
+	
+for: slt $t0 , $s4 , $s2 # for(i= 0 ; i<n ; i++)
+     beq $t0 , $0 , exit_for # condizione di uscita del for 
+     sll $t0 , $s4 , 2 # t0 = 4*i registro temporaneo perche lo riscrivo sempre 	
+     add $t0 , $s0 , $t0  # sommo spiazzamento array su array A 
+     lw $a0 , 0($t0) # a0 = A[i]
+     add $a1 , $s1 , $0  # riescrivo l indirizzo . lo faccio perche al ritorno della futura funzione occorre non sapro se sara stato modificato l indirizzo	 
+     add $a2 , $s2 , $0 # stessa cosa di su 	 
+     jal occorre
+     bne $v0 , $0 , contatore
+     add $s4 , $s4 , 1 # i++
+     j for
+     		
+contatore :  addi $s3 , $s3 , 1 # contatore++
+	     addi  $s4 , $s4 , 1 # i++ 
+	     j for 		
+	     	
+ exit_for: add $v0 , $s3  , $0 
+           lw $ra , 0($sp)
+	   lw $s0 , 4($sp)
+	   lw $s1 , 8($sp)
+	   lw $s2 , 12($sp)
+	   lw $s3 , 16($sp)
+	   lw $s4 , 20($sp)
+ 	   addi $sp , $sp , 24
+ 	   jr $ra 	
+     		     		     		     		
+# a0 = A[i] , a1= &B  , A2 = n
+# procedura foglia quindi non mi interessa slvare nulla a patto che non usi registri permanenti 	
+
+occorre:  add $t0 , $0 , $0 # i = 0  
+	  add $v0 , $0 , $0 # condizione = 0 
+
+while:  slt $t2 , $t0 , $a2 # while(i<n && !condizione)
+	beq $t2 , $0 , exit_while 
+	bne $v0 , $0 , exit_while 
+        sll $t3 , $t0 , 2 # t3 = 4*i  	
+        add $t3 , $a1 , $t3  # sommo spiazzamento array su array B
+        lw $t3 , 0($t3) # t3 = B[i]
+        beq $t3 , $a0 , condizione
+	add $t0 , $t0 , 1 # i++
+	j while
+
+condizione: addi $v0 , $0 , 1 # condizione =1 
+	    add $t0 , $t0 , 1 # i++
+	    j while
+	    
+exit_while: jr $ra

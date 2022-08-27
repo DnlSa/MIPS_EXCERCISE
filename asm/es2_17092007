@@ -1,0 +1,41 @@
+.data 
+
+a: .word  1 2 3 4 5 6 7 
+b: .word  1 2 3 4 5 5 6 
+n: .word  7
+.text
+.globl main
+main: 
+	la $a0 , a
+	la $a1 , b
+	la $a2 , n
+	lw $a2 , 0($a2)
+	jal scalare 
+	add $a0 , $v0 , $0 
+	li $v0 , 1
+	syscall
+	li $v0 ,10 
+	syscall
+	
+# trattasi di una procedura foglia ricorsiva 
+scalare: 
+	addi $sp , $sp , -4 # push dei valori dallo stack 
+	sw $ra , 0($sp)
+	add $a2 , $a2 , -1 # n-1
+	beq $a2 , $0 , exit
+	sll $t0 , $a2 , 2 # 4*(n-1)
+	add $t1 , $a0 , $t0 # A[i]
+	add $t2 , $a1 , $t0 # B[i]
+	lw $t1 , 0($t1) # t1 = A[i]
+	lw $t2 , 0($t2) # t2 = B[i]
+	mult $t1 , $t2 # A[i]*B[i]
+	mflo $t1
+	add $v0 , $v0 , $t1  # v0 += t1-> somma += A[i]*B[i]
+	jal scalare # chiamata ricorsiva 
+
+exit:   lw $ra, 0($sp)
+	addi $sp , $sp , 4 # pop valori dallo stack 
+	jr $ra
+	
+
+	

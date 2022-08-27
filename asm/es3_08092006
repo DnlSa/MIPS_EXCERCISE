@@ -1,0 +1,41 @@
+.data
+A: .word  1 2 3 3 5 6 7 78
+n: .word  8
+
+
+.text
+.globl main
+main:   la  $a0 , A
+	la  $a1 , n
+	lw $a1 , 0($a1)
+	jal Proc
+	add $a0 , $v0 , $0
+	li $v0 ,1
+	syscall
+	li $v0 , 10
+	syscall
+
+Proc: add  $t0 , $0 , $0 # t0 = i
+      add $t1 , $0 , $0 # t1 = somma = 0
+      addi $a1 , $a1 , -1  # n-1
+for: slt $t2 , $t0 , $a1 # for(i= 0 ; i< n-1 , i++)
+     beq $t2 , $0 , exit_for
+     lw $t3 , 0($a0) # t3 = A[i]
+     lw $t4 , 4($a0) # t4 = A[i+1]
+     add $t5 , $t4 , 10 # t4 = A[i+1]+10
+     # faccio ciclo if
+     slt $t5 , $t3 , $t5  # if(A[i]<= A[i+1]+10)
+     bne $t3 , $t4 , continue # if (A[i]== A[i+1]) se uguale continua
+     beq $t5 , $0 , continue #
+     add $t1 , $t1 , $t3 # somma+=A[i]
+     addi $t0 , $t0 , 1
+     addi $a0 , $a0 , 4  
+     j for 
+ 
+continue: addi $t0 , $t0 , 1
+     addi $a0 , $a0 , 4  
+     j for 
+    
+exit_for: add $v0 , $t1 , $0 
+     jr $ra
+     

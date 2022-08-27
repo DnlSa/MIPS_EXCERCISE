@@ -1,0 +1,99 @@
+
+# 1 se un numero dell array A e contenuto k volte in B
+
+.data
+
+A: .word 1 6 2 4 5 3 5 6 67 
+B: .word 1 3 5 3 7 8 9 34 4
+k: .word 3
+
+
+.text
+.globl main
+
+main: 
+	la $a0 , A # int  *A = A 
+	la $a1 , B # int  *B = B
+	#calcolo n
+	sub $t0 , $a1 , $a0 
+	add $t2 , $0 , 4
+	div $t0 , $t2
+	mflo $a2 # n = lunghezza arrray A e B
+	lw $a3 , k # k = 4
+	jal procedura 
+	add $a0 , $0 , $v0 # stampa intero  
+	li $v0 , 1
+	syscall
+	li $v0 ,10  # return 
+	syscall 
+
+procedura: 
+	add $sp , $sp , -28
+	sw $ra , 0($sp)
+	sw $s0 , 4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12($sp) 
+	sw $s3 , 16($sp) 
+	sw $s4 , 20($sp)
+	sw  $s5 ,24($sp) 
+
+	add $s2 , $0 , $a0 # *A 
+	add $s3 , $0 , $a1 # *B
+	add $s4 , $0 , $a2 # n
+	add $s5 , $0 , $a3 # k
+	add $s0 , $0 , 0 # int i = 0
+	add $s1 , $0 , 0 # condizione = 0 
+	
+while: 	slt $t0 , $s0 , $s4 # while (i<n)
+	beq $t0 , $0 , exit # quando arriva a 0 exit 
+	lw $a0 , 0($s2) # int x primo elemtno array 
+	# a1 = *B ; 
+	# a2 = n ;  
+	jal conta_occorrenze 
+	beq $v0 , $s5 , exit # va in exit se soddisco la condizione 
+	add $s2 , $s2 , 4 # spiazza registro di 4 byte
+	add $s0 , $s0 , 1 # i++ 
+	j while 
+	
+exit:	add $v0 , $v0 , 1
+	slt $v0 , $s5 , $v0 # s5 < v0 allora 1 altrimenti 0 
+	lw $ra , 0($sp)
+	lw $s0 , 4($sp)
+	lw $s1 , 8($sp)
+	lw $s2 , 12($sp) 
+	lw $s3 , 16($sp) 
+	lw $s4 , 20($sp)
+	lw  $s5 ,24($sp) 
+	add $sp , $sp , 28
+	jr $ra
+	
+	
+	
+	
+	
+	
+conta_occorrenze :  # questa e una procedura foglia da manuale e meglio usare registri temporanei 
+	add $t0 , $0 , $0 # j=0
+	add $t1 , $0 , $0 # contatore = 0
+	add $t2 , $0 , $a2 # n  
+	add $t3 , $0 , $a0 # x 
+	add $t4 , $0 , $a1 # *B
+	add $v0 , $0 ,$0  # pulisco registro 
+		
+for:  slt $t5 , $t0 , $t2  # for(j= 0 ; j<n ; j++) 
+      beq $t5 , $0 , return
+      add $t0 , $t0 , 1 # j++
+      lw $t7 , 0($t4) # carico elementi array B
+      beq $t3 , $t7 , else  # rivedere i ìl costtutto 
+      add $t4 , $t4 , 4 # spiazzo registro di 4 byte 
+      j for # torno nel for 
+   
+ else : add $t6, $0 , 1
+ 	add $v0 , $v0 , $t6 # incrementa se e vera la condizione slt
+   	add $t4 , $t4 , 4 # spiazzo registro di 4 byte 
+   	j for 
+   
+return : jr $ra
+     
+
+		

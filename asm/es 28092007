@@ -1,0 +1,70 @@
+.data
+a: .word 1 2 3 4 5 6 
+b: .word 2 6 4 5 6 9 
+c: .word 1 2 3 4 5 6 
+n: .word 6
+.text
+.globl main
+main:   la $a0 , a
+	la $a1 , b
+	la $a2 , c 
+	la $a3 , n
+	lw $a3 , 0($a3)
+	jal calcolo 
+	add $a0 , $v0 , $0 # non ritornava la funzione finche non mettevo questo 
+	li $v0 , 10 
+	syscall
+# convenzione di chiamata importante in quanto devo chiamare una funzione max 
+calcolo: addi $sp , $sp , -24
+	sw $ra , 0($sp)
+	sw $s0 , 4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12 ($sp)
+	sw $s3 , 16($sp)
+	sw $s4 , 20($sp)
+	add $s0 , $a0 , $0 # s0 = &a
+	add $s1 , $a1 , $0 # s1 = &b
+	add $s2 , $a2 , $0 # s2 = &c 
+	add $s3 , $a3 , $0 # s3 = n
+	add $s4 , $0 , 0 # s4 = i
+
+for:  slt $t0 , $s4 , $s3    # for( i=0 ; i>n ; i++)
+      beq $t0 , $0 , exit_for # if(n == 0 ) -> goto exit_for  ; else continue 
+      lw $a0 , 0($s0)
+      lw $a1 , 0($s1)
+      jal max
+      lw $t0 , 0($s2)
+      add $t0 , $t0 , $v0 # v0 e il max fra a[i] e B[i]
+      sw $t0 , 0($s2)
+      addi $s4 , $s4 , 1 # i++
+      add $s0 , $s0 , 4  # incremento offset al intero successivo 
+      add $s1 , $s1 , 4
+      add $s2 , $s2  , 4
+      j for # jump for 
+     
+exit_for: lw $ra , 0($sp) # pop dei valori origianari 
+	lw $s0 , 4($sp)
+	lw $s1 , 8($sp)
+	lw $s2 , 12 ($sp)
+	lw $s3 , 16($sp)
+	lw $s4 , 20($sp)
+	addi $sp , $sp , 24
+	jr $ra # return 
+#procedura forglia quindi non viene richeista la convenzione di chiamata 
+# $a0 -> a[i] , $a1 -> b[i] 
+max: slt $t0 , $a0 , $a1 # if(a0 < a1) -> goto max_2 
+     bne $t0 , $0 , max_2 # else -> continue 
+     add $v0 , $0 , $a0
+     jr $ra
+     
+max_2: add $v0 , $0 , $a1
+      jr $ra
+ 
+  
+   
+    
+     
+      
+       
+        
+          

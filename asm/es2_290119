@@ -1,0 +1,41 @@
+.data
+A: .word 1 4 5 6 7 8 9 5  
+B: .word 1 5 8 1 8 9 3 1 
+n: .word 8
+k: .word 3 
+.text
+.globl main
+main:
+	la $a0 , A
+	la $a1 , B
+	la $a2 , n
+	lw $a2 , 0($a2)
+	lw $a3 , 4($a2)
+	jal Procedura
+	add  $a0 , $v0 , $0
+	li $v0 ,1
+	syscall
+	li $v0 , 10
+	syscall
+Proceduta: addi $sp , $sp , -28
+	sw $ra , 0($sp)
+	sw $s0 , 4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12($sp)
+	sw $s3 , 16($sp)
+	sw $s4 , 20($sp)
+	s2 $s5 , 24($sp)	
+	add $s0 , $a0 , $0 # s0 = a0 = &A 
+	add $s1 , $a1 , $0 # s1 = a1 = &B
+	add $s2 , $a2 , $0 #s2 = a2 = n
+	add $s3 , $a3 , $0 # s3 = a3 = k
+        add $s4 , $0 ,  $0 # s4 = i 
+	add $s5 , $0 , $0 # inizializzo condizione=0 $S5
+
+while : slt $t0 ,$s4 , $s2 # while (i<n)
+	bne $t0 ,$0 , end
+		
+	
+
+
+end

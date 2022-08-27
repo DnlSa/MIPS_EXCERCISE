@@ -1,0 +1,79 @@
+.data 
+
+A : .word 1 2 3 4 5 6 7 8 
+m : .word 8 
+k : .word 4
+h : .word 7
+
+.text 
+.globl main
+
+main:
+	la $a0 , A # carico in a0 l indirizzo array 
+	
+	la $a1 , m
+	lw $a1 , 0($a1) # carico in a1 = m
+	
+	la $a2 , k
+	lw $a2, 0($a2) # carico in a2 = k
+	
+	la $a3 , h
+	lw $a3 , 0($a3) # carico in a3 = h
+	
+	jal conta_sost
+	addi $a0 , $v0 , 0 
+	
+	li $v0 , 4  # stampa valore di ritorno 
+	syscall 
+	
+	li $v0 , 10 # return
+	syscall 
+
+
+
+conta_sost: # conta sostituzioni fatte 
+	addi $t0 , $0 , 1          # $t0 =1
+	bne $a1 , $t0 , ricorsione # if (m!=1) -> go to ricorsione 
+	lw $t0 , 0($a0) # t0 = A[0]
+	beq $t0 , $a2 , ret1 # if(A[0]== k) -> go to ret1
+	add $v0 , $0 , $0  # else return 0
+	jr $ra # return id uscira 
+	
+ret1: 
+	sw $a3 , 0($a0)  # A[0] = h
+	addi $v0 ,$0 , 1 # reutrn 1
+	jr $ra # return 
+
+ricorsione:
+	addi $sp , $sp , -16 # salvo valori nello stack 
+	sw $ra , 0($sp)
+	sw $a0 , 4($sp)
+	sw $a1 , 8($sp)
+	
+	srl $a1 , $a1 , 1 # a0 = m/2
+	jal conta_sost  # chiamo la funzione # conta_sost(A , m/2,k,h)
+	sw $v0 , 12($sp) #salvo il valore di ritorno in $v0 
+	
+	
+	lw $a0 , 4($sp) # ripristino valori originali $a0
+	lw $a1 , 8($sp) # ripristino valore originale $a1
+	sll $t0 , $a1 , 1 # moltiplico m/2 *4
+	add $a0 , $a0 , $t0 # A+m/2
+	srl $a1 , $a1 ,1 # a1 = m/2
+	jal cota_sost  # chiamo la funzione # conta_sost(A+m/2 , m/2,k,h)
+	
+	
+	
+	#SOMMA conta_sost(A , m/2,k,h) + conta_sost(A/2 , m/2,k,h)
+	lw $t0 , 12($sp) # ripristino il vecchio v0 della precedente chiamata 
+	add $v0 , $t0 , $v0 # somma dei return 
+	
+	lw $ra , 0($sp)           # pop dei valori 
+	addi $sp , $sp , 16 # ripristino stack 
+	jr $ra  # return 
+	
+	
+	
+	
+	
+	

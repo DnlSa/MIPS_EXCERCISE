@@ -1,0 +1,105 @@
+.data 
+
+mat1 : .word 2 3  1 5
+
+mat2 : .word 3 2  0 4
+
+N : .word 2
+
+.text
+.globl main
+
+
+main: 
+	la $a0 , mat1 # a0 <- mat1
+	la $a1 , mat2 # $a1 <- mat2
+	lw $a2 , N   # $a2 <- N
+	la $t0 , N
+	add $a3 , $t0 , 4 # nel segmento data e il primo spazio di memoria libero 
+	addi $sp , $sp , -4
+	sw $ra , 0($sp)
+	
+	
+	jal matrix # int *matrix(mat1 , mat2, N)
+	
+	# va in ritorno l indirizzo del primo elemento della matrice 
+ 	# dovra stamapre il valori in modo iterato 
+ 	 	
+ 	 lw $ra , 0($sp)    # return 0 
+ 	 addi $sp , $sp , 4
+ 	 jr $ra
+ 	 
+ 	 
+ 	 
+ matrix: 
+ 	addi $sp , $sp , -24
+	sw $ra , 0($sp)
+	sw $s0 , 4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12($sp)
+	sw $s3 , 16($sp)
+	sw $a3 , 20($sp) 
+	 
+	add $s0 , $0 , $a0 # s0 <- a0 <- mat1
+	add $s1 , $0 , $a1 # s1 <- a1 <- mat2
+	add $s2 , $0 , $a2 # s2 <- a2 <- N
+	add $t0 , $0 , $a2 # t0 <- N
+	add $t5 , $0 , $a2 # t5 <- N
+	add $s3 , $0 , $0 # s3 <- 0
+	
+	
+loop:  	beq $t0 , $0 , exit # while(h != 0)
+
+	lw $t1 , 0($s0) # $t1 <- mat1[i][j]
+	lw $t2 , 0($s1) # $t2 <- mat2[i][j]
+	mult $t1 , $t2  
+	mflo $t1 # t1 <- t1*t2
+	
+	add $s3, $s3 , $t1 # $s3 <- s3+(t1*t2)
+	add $s0 , $s0 , 4 # mat1[i][j+1]
+	add $t4 , $0 , 4 #  t4 <- 4 byte (int dimension)
+	mult $t5 , $t4   # perche 
+	mflo $t3         # t3 <- N*4
+	add $s1 , $s1 , $t3  # mat2[i+1][j]
+	add $t0 , $t0 , -1 # h--
+	j loop
+	
+exit: 	
+	sw $s3 , 0($a3)
+	add $a3 , $a3 , 4 # a3 <- nuova area di memoria vuota
+	add $a1 , $a1 , 4 # mat2[i][j+1]	
+	jal matrix
+	add $v0 , $0 , $a3
+	lw $ra , 0($sp)
+	lw $s0 , 4($sp)
+	lw $s1 , 8($sp)
+	lw $s2 , 12($sp)
+	lw $s3 , 16($sp)
+	lw $a3 , 20($sp)
+	addi $sp , $sp , 24
+	jr $ra
+	 
+	
+	
+	
+	
+	
+	
+	
+	
+	#add $t4 , $0 , 4 #  t4 <- 4 byte (int dimension)
+	#mult $t5 , $t4   #  
+	#mflo $t3         # t3 <- N*4
+	#add $a0 , $a0 , $t3  # mat1[i+1][j]
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

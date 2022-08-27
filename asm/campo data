@@ -1,0 +1,39 @@
+# .text - inizio bloccoistruzioni
+# global x - indica che la label x e accessibile da un altro programma
+# .eqv $nome, $reg - permette di usare $nome per riferici a $reg
+# .macro e .end_maro - definisce una macro
+
+.data # ci mettiamo i dati statici che non variano mai 
+
+label: .tipo val1, val2, val3 # costruisco array di valori separandoli con le virgole
+
+label_ripetuta: .tipo val:50  # val ripetuto 50 volte  
+
+# come funziona?
+# metto il nome variabile : .direttiva valori ecc 
+
+# direttive disponibili
+# .alignk  - allinea i prissimi dati alla potenza k^2 -	esempio .align 2
+# .space - rierva n byte               				s: .space 255
+# .word - alloca spazio per delle word  			n: .word 1,2,3
+# .half - alloca spazio per delle half word			h: .half 0:10
+# .asciiz - alloca un testo ASCII terminato da 0 	      txt: .asciiz "ciao"
+# .ascii alloca un testo ASCII 				      txt: .ascii "ciao"
+
+# align 2 si utilizza per allineare dati a multipli di 4 2^2 
+#il perche e semplice : dato che hw e ottimizzato per trasferire 4 byte faccciamo in modo che il loro 
+#recuperi sua piu facile ( la posizione di inizio e dei dati e semplice da caloclare perche e a multiplidi word)
+# il lato negativo e che si creano poi dei buchi in memoria
+
+#la MACRO invece serve a definire dei blocchi come se fossero delle funzioni . durante l assemblameno rimpiazzate dal codice che contengono 
+
+#esempio della macro 
+
+
+.macro takeInt ($s0)
+	li $v0 , 5 # prende in input un intero 
+	syscall
+	move $s0 , $v0
+.end_macro
+
+

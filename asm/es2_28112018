@@ -1,0 +1,90 @@
+.data 
+i :  .word 5
+.text
+.globl main
+
+main: la $a0 , i
+      lw $a0 , 0($a0)
+      jal procF
+
+procF: slti $t0 , $a0 , 2  
+       beq  $t0 , $0 , fRic
+       addi $v0 , $0 , 1
+       jr $ra
+       
+fRic:  addi $sp , $sp , -16
+       sw $ra , 0($sp)
+       sw $s0 , 4($sp)
+       sw $s1 , 8($sp)
+       sw $s2 , 12($sp)
+       add $s0 , $0 , $a0 # s0 = i 
+       addi $a0 , $a0 , -2
+       jal procF 
+       add $s1 , $v0 , $0 
+       sll $s1 , $s1 , 1 # 2*f(i-2)
+       addi $a1 , $s0 , -1 # a1 = i-1
+       jal procG # g(i-1)
+       add $s2 , $v0 , $0 # s2 = v0 
+       add $t1 , $s2 , $0 # t1 = s2
+       sll $s2 , $s2 , 2 # 4*s2
+       add $s2 , $t1, $0 # s2+t1 utile per fare 5*s2
+       add $s0 , $s0 , -3 
+       add $v0 , $s1 , $s2 # v0 = s1+s2 -> v0 = 5*g(i-1)+2*f(i-2)
+       add $v0 , $v0 , $s0 # v0 += s0 -> v0+(i-3)  
+       lw $ra , 0($sp)
+       lw $s0 , 4($sp)
+       lw $s1 , 8($sp)
+       lw $s2 , 12($sp)
+       addi $sp , $sp , 16
+       #jr $ra
+       
+procG: slti $t0, $a1 , 3	
+       beq $t0 , $0 , GRic
+       add $v0 , $0 , 4
+       jr $ra
+        	
+ GRic: addi $sp , $sp , -8
+       sw $ra , 0($sp)
+       sw $s0 , 4($sp)
+      add $s0 , $a1 , $0  # s0 = i
+      srl $a0 , $s0 , 1 # a0 = i/2 
+      jal procF
+      addi $a0 , $v0 , 0  # provmo valore di ritorno che va nel MIN     			
+      add $a1 , $s0 , $0 
+      addi $a1 , $a1 , -1
+      jal procG
+      add $a1 , $v0 , $0
+      add $a2 , $s0 , $0
+      jal min
+      lw $ra , 0($sp)
+      lw $s0 , 4($sp)	 			 			
+      addi $sp , $sp , 8
+      jr $ra	
+     
+min: slt $t0 , $a0 , $a1 # if(a0 < a1) -> continue
+     beq $t0 , $0 , min_1 # else -> go to min_1	 			 			 			
+     slt $t0 , $a0 , $a2 # if(a0 < a2) -> continue	 			 			 			
+     beq $t0 , $0 , min_2 # else -> go to min_2	 			 			 			 			
+     add $v0 , $0 , $a0 
+     jr $ra
+
+min_1:  slt $t0 , $a1 , $a2 # if(a1 < a2) -> continue	 			 			 			
+     	beq $t0 , $0 , min_2 # else -> go to min_2	
+        add $v0 , $0 , $a1 
+    	jr $ra
+
+min_2: add $v0 , $0 , $a2 
+    	jr $ra
+ 	   	
+    	 			 			 			 				 			 			 			 			 			
+    	 			 			 			 				 			 			 			 			 			 			 			 			 				 			 			 			 			 			 			 			 			 				 			 			 			 			 			
+        			 			 			 			 			 			 			 			
+        			 			 			 			 			 			 			 			 			
+        			 			 			 			 			 			 			 			 			 			
+        			 			 			 			 			 			 			 			 			 			 			
+        			 			 			 			 			 			 			 			 			 			 			 			
+        			 			 			 			 			 			 			 			 			 			 			 			 			
+        			 			 			 			 			 			 			 			 			 			 			 			 			 			
+        			 			 			 			 			 			 			 			 			 			 			 			 			 			 			 			
+       			 			 			
+       			 			 			 			 			

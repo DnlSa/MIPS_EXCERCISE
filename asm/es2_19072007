@@ -1,0 +1,51 @@
+.data
+a: .word 3 9 6 1 2 3 4 5
+n: .word 8 
+.text
+.globl main
+main:
+	la $a0 , a
+	la $a1 , n
+	lw $a1 , 0($a1)
+	jal bubbleSort
+	li $v0 , 10
+	syscall
+bubbleSort: 
+	addi $sp , $sp , -20
+	sw $ra , 0($sp)
+	sw $s0 , 4($sp)
+	sw $s1 , 8($sp)
+	sw $s2 , 12($sp)
+	sw $s3 , 16($sp)
+	add $s0 , $a0 , $0 # $s0 = &a
+	add $s1 , $a1 , $0 # $s1 = n  
+	addi $s3 , $s1 , -1 # s3 = n-1
+do :  add $t7 , $0, $0 # swapped = 0  vedere se salvarlo o no 
+      add $s2 , $0 , $0 # i=0 
+for:  slt $t0 , $s2 , $s3 # for(i=0  ;i<n-1 ; i++)
+      beq $t0 , $0  , exit_for
+      sll $t3 , $s2 , 2 #  t3 = &A[i] 
+      add $a2 , $t3 , $s0 # inirizzo di a
+      lw $a0 , 0($a2) # a[i]
+      lw $a1 , 4($a2) # a[i+1]
+      slt $t1 , $a1 , $a0 # if(a[i]>a[i+1]) -> se vera e 1  go to swap
+      bne $t1 , $0 , swap_go #  else  continue ;
+      add $s2 , $s2 , 1 # i++
+      j for # go to for  
+exit_for: bne $t7 , $0 , do # while(swapped) 
+	lw $ra , 0($sp)
+	lw $s0 , 4($sp)
+	lw $s1 , 8($sp)
+	lw $s2 , 12($sp)
+	lw $s3 , 16($sp)
+	addi $sp , $sp , 20
+	jr $ra
+swap_go: jal swap
+         add $t7 ,$0 , $v0 # se invoco allora ritorna 1 altrimenti posso anche invertire 
+     	 add $s2 , $s2 , 1 # i++
+   	 j for # go to for 
+# a0 = a[i] , a1= a[i+1] , a2= &a[i] 
+swap: addi $v0 , $0 , 1 # swapped = 1
+      sw $a0 , 4($a2) 
+      sw $a1 , 0($a2)
+      jr $ra
